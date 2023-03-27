@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Películas</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/clasico">Cine clásico</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/moderno">Cine moderno</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/publicar" id="linkPublicar">Publicar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/login" id="linkLogin">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/registro" id="linkRegistro">Registro</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="" id="linkLogout">Logout</a>
+        </li>
+    </div>
+  </div>
+</nav>
+
+
+<script>
+    let token = localStorage.getItem('jwt');
+    
+    if(token){
+        linkLogin.style.display = "none";
+        linkRegistro.style.display = "none";
+    }else{
+        linkPublicar.style.display = "none";
+        linkLogout.style.display = "none";
+    }
+</script>
