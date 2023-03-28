@@ -1,0 +1,39 @@
+<h2 class="text-center">Ruta publicar / protegida</h2>
+
+
+{{#if error}}
+<h2 class="text-center mt-3">{{error}}</h2>
+
+{{else}}
+    <h3 class="text-center">Usuario: {{usuario.email}}</h3>
+
+    <form action="" id="addPelicula">
+        titulo de la película: <input type="text" id="addTitulo" name="titulo">
+        contenido de la película: <textarea name="contenido" cols="30" rows="10" id="addContenido"></textarea>
+        seleccione una categoría:
+        <select name="" id="addCategoria">
+            {{#each categorias}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+            {{/each}}
+        </select>
+        Imagen: <input type="file" name="foto">
+        <button class="btn btn-primary mt-3">Enviar</button>
+    </form>
+
+{{/if }}
+
+
+<script>
+
+    let formulario = document.getElementById("addPelicula");
+    formulario.addEventListener("submit", (event) => {
+        event.preventDefault();
+        console.log(addTitulo.value, addContenido.value, addCategoria.value )
+    })
+</script>
+
+<style>
+    #addPelicula input, textarea, select{
+        display: block;
+    }
+</style>

@@ -3,7 +3,8 @@ const {create}= require('express-handlebars');
 const path = require('path');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
-const {getPublicaciones, getUsuarioByEmailAndPassword} = require('./consultas.js')
+const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias} = require('./consultas.js')
+const { verificarToken } = require("./middlewares/jwt.js")
 
 const app = express();
 
@@ -60,6 +61,24 @@ app.get("/login", (req, res) => {
     res.render("login")
 })
 
+app.get("/publicar", verificarToken, async (req, res) => {
+
+    try {
+        let categorias = await getCategorias();
+        let usuario = req.usuario
+
+        res.render("publicar",{
+        usuario,
+        categorias
+    })
+    } catch (error) {
+        console.log(error)
+        res.render("publicar",{
+            error: "Se ha generado un error que no permite cargar los datos de la vista."
+        })
+    }
+})
+
 
 
 //ENDPOINTS
@@ -69,7 +88,7 @@ app.post("/api/v1/login", (req, res) => {
         let {email, password} = req.body;
         getUsuarioByEmailAndPassword(email, password)
         .then(usuario => {
-            if(usuario.length ==0) return res.status(401).json({code: 401, message: "Pruebe intentando otra vez"})
+            if(usuario) return res.status(401).json({code: 401, message: "Pruebe intentando otra vez"})
             let tokenKey
             jwt.sign({usuario}, SECRETO, (err, token) => {
                 if(err){
@@ -88,5 +107,10 @@ app.post("/api/v1/login", (req, res) => {
         res.status(500).json({code: 500, message: "Error del servidor"})
     }
     
+})
+
+
+app.post("/api/v1/publicar", verificarToken, (req, res) => {
+    res.send("gracias por publicar")
 })
 

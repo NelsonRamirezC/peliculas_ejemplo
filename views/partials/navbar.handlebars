@@ -34,6 +34,10 @@
 
 <script>
     let token = localStorage.getItem('jwt');
+
+    let linkPublicar = document.getElementById("linkPublicar");
+    let linkLogout = document.getElementById("linkLogout");
+
     
     if(token){
         linkLogin.style.display = "none";
@@ -42,4 +46,18 @@
         linkPublicar.style.display = "none";
         linkLogout.style.display = "none";
     }
+
+    linkPublicar.addEventListener("click", (event) => {
+        event.preventDefault();
+        if(token){
+            location.href = "/publicar?token="+token
+        }else{
+            alert("Debe loguearse para obtener permisos a esa ruta.")
+        }
+    })
+
+    linkLogout.addEventListener("click", (event) => {
+        localStorage.clear();
+        location.href = "/";
+    })
 </script>

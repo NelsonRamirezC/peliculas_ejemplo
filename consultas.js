@@ -24,14 +24,23 @@ const getPublicaciones = async () => {
         return resultado.rows;
 }
 
-const getUsuarioByEmailAndPassword = async (email, password) => {
-    let consulta = "SELECT nombre, email FROM usuarios WHERE email = $1 AND password = $2"
-    let resultado = await pool.query(consulta, [email, password]);
+const getCategorias= async () => {
+    let consulta = "SELECT id, nombre FROM categorias order by nombre ASC"
+    let resultado = await pool.query(consulta);
     return resultado.rows;
 }
+
+const getUsuarioByEmailAndPassword = async (email, password) => {
+    let consulta = "SELECT id, nombre, email FROM usuarios WHERE email = $1 AND password = $2"
+    let resultado = await pool.query(consulta, [email, password]);
+    return resultado.rows[0];
+}
+
+getCategorias
 
 
 module.exports = {
     getPublicaciones,
-    getUsuarioByEmailAndPassword
+    getUsuarioByEmailAndPassword,
+    getCategorias
 }
