@@ -19,7 +19,11 @@ const pool = new Pool({
 
 //TRAER PUBLICACIONES
 const getPublicaciones = async () => {
-        let consulta = "SELECT titulo, contenido, imagen, fecha FROM publicaciones order by fecha"
+        let consulta = `
+                        select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as autor from publicaciones p
+                        join usuarios u
+                        on p.id_usuario = u.id
+        `
         let resultado = await pool.query(consulta);
         return resultado.rows;
 }
@@ -36,11 +40,18 @@ const getUsuarioByEmailAndPassword = async (email, password) => {
     return resultado.rows[0];
 }
 
-getCategorias
+const addPublicacion = async (titulo, contenido, id_categoria, id_usuario, imagen) => {
+    let query = `INSERT INTO publicaciones(titulo, contenido, fecha, id_categoria, id_usuario, imagen)
+                VALUES($1, $2, NOW(), $3, $4, $5) RETURNING *
+    `
+    let resultado = await pool.query(query, [titulo, contenido, id_categoria, id_usuario, imagen]);
+    return resultado.rows[0];
+}
 
 
 module.exports = {
     getPublicaciones,
     getUsuarioByEmailAndPassword,
-    getCategorias
+    getCategorias,
+    addPublicacion
 }

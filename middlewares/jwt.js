@@ -7,6 +7,7 @@ const verificarToken = (req, res, next) => {
     let tokenQuery = req.query.token;
     if(tokenQuery) token = tokenQuery;
     let tokenHeader = req.headers['authorization'];
+
     if(tokenHeader){
         tokenHeader = tokenHeader.split(" ");
         tokenHeader = tokenHeader[1];

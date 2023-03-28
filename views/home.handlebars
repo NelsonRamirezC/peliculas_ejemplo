@@ -1,6 +1,8 @@
 <h2 class="text-center mt-3">VISTA PRINCIPAL</h2>
 
 
+<section class="py-5">
+
     {{#if error}}
         <h2 class="text-center mt-2">{{error}}</h2>
     {{else}}
@@ -12,9 +14,13 @@
                     titulo=this.titulo
                     contenido=this.contenido
                     fecha = this.fecha
+                    autor = this.autor
                     }}
                 </div>
         {{/each}}
     </div>
        
     {{/if}}
+
+</section>
+

@@ -3,8 +3,11 @@ const {create}= require('express-handlebars');
 const path = require('path');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
-const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias} = require('./consultas.js')
+const fileUpload = require('express-fileupload');
+const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion} = require('./consultas.js')
 const { verificarToken } = require("./middlewares/jwt.js")
+const { upload } = require('./middlewares/upload.js')
+const fs = require('fs');
 
 const app = express();
 
@@ -16,6 +19,13 @@ const SECRETO = process.env.SECRETO || "123456";
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use('/public', express.static('public'));
+
+let limiteMb = 2;
+app.use(fileUpload({
+    limits: { fileSize: limiteMb* 1024 * 1024 },
+    abortOnLimit: true,
+    responseOnLimit: `Usted ha superado el límite permitido (${limiteMb})`
+}));
 
 
 
@@ -88,7 +98,8 @@ app.post("/api/v1/login", (req, res) => {
         let {email, password} = req.body;
         getUsuarioByEmailAndPassword(email, password)
         .then(usuario => {
-            if(usuario) return res.status(401).json({code: 401, message: "Pruebe intentando otra vez"})
+            console.log(usuario)
+            if(usuario == undefined) return res.status(401).json({code: 401, message: "Pruebe intentando otra vez"})
             let tokenKey
             jwt.sign({usuario}, SECRETO, (err, token) => {
                 if(err){
@@ -110,7 +121,29 @@ app.post("/api/v1/login", (req, res) => {
 })
 
 
-app.post("/api/v1/publicar", verificarToken, (req, res) => {
-    res.send("gracias por publicar")
+app.post("/api/v1/publicar", verificarToken, upload, (req, res) => {
+
+    try{
+        let {titulo, contenido, idCategoria} = req.body;
+
+        if(titulo ==undefined || contenido == undefined || idCategoria == undefined){
+            fs.unlinkSync(path.resolve("./public/img/"+ req.imagen));
+            return res.status(400).json({code: 400, message: "no ha proporcionado todo el contenido requerido."})
+        }
+
+        console.log(req.usuario)
+        addPublicacion(titulo, contenido, idCategoria, req.usuario.id, req.imagen)
+        .then(respuesta => {
+            res.status(201).json({code: 201, message: "Publicación realizada con éxito."})
+        }).catch(error => {
+            console.log(error)
+            fs.unlinkSync(path.resolve("./public/img/"+ req.imagen));
+            res.status(500).json({code: 500, message: "Error con la base de datos."})
+        })
+
+    }catch(error){
+        fs.unlinkSync(path.resolve("./public/img/"+ req.imagen));
+        res.status(500).json({code: 500, message: "no se pudo realizar la publicación"})
+    }
 })
 
