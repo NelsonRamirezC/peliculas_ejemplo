@@ -17,30 +17,23 @@ CREATE TABLE publicaciones(
 	fecha date NOT NULL,
 	id_categoria INT NOT NULL,
 	id_usuario INT NOT NULL,
+	imagen VARCHAR(255),
 	FOREIGN KEY(id_categoria) REFERENCES categorias(id),
 	FOREIGN KEY(id_usuario) REFERENCES usuarios(id)
 );
 
-ALTER TABLE publicaciones ADD COLUMN imagen VARCHAR(255);
 
 CREATE TABLE comentarios(
 	id serial primary key,
 	contenido VARCHAR(1000) NOT NULL,
 	id_usuario INT NOT NULL,
 	id_publicacion INT NOT NULL,
+	fecha date NOT NULL DEFAULT NOW(),
 	FOREIGN KEY(id_usuario) REFERENCES usuarios(id),
 	FOREIGN KEY(id_publicacion) REFERENCES publicaciones(id)
 );
-truncate table comentarios;
-ALTER TABLE comentarios ADD COLUMN fecha date NOT NULL default NOW();
 
 INSERT INTO categorias(nombre) VALUES('Clásico'), ('Moderno');
-UPDATE publicaciones SET imagen = 'imagen.jpg'
 
 INSERT INTO usuarios(nombre, email, password) VALUES('carlos', 'carlos@gmail.com', '123456'), ('pepito', 'pepito@gmail.com', '123456');
 
-INSERT INTO publicaciones(titulo, contenido,fecha,id_categoria, id_usuario) VALUES
-('Película titulo 1', 'Contenido película 1', now(), 1, 1),
-('Película titulo 2', 'Contenido película 2', now(), 2, 2);
-
-select * from categorias;
