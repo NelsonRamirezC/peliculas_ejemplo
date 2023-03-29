@@ -23,14 +23,15 @@ const getPublicaciones = async () => {
                         select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as autor from publicaciones p
                         join usuarios u
                         on p.id_usuario = u.id
+                        order by p.fecha DESC
         `
         let resultado = await pool.query(consulta);
         return resultado.rows;
 }
 
-const getPublicacioById = async (id) => {
+const getPublicacionById = async (id) => {
     let consulta = `
-    select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as usuario, ct.nombre as categoria from publicaciones p
+    select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as autor, ct.nombre as categoria from publicaciones p
     join categorias ct
     on p.id_categoria = ct.id
     join usuarios u
@@ -77,9 +78,44 @@ const addPublicacion = async (titulo, contenido, id_categoria, id_usuario, image
 }
 
 const getComentarios = async(id) => {
-    let consulta = "SELECT * FROM comentarios where id_publicacion = $1"
+    let consulta =`
+            select c.contenido, u.nombre, c.fecha  from comentarios c
+            join usuarios u
+            on c.id_usuario = u.id
+            join publicaciones p
+            on p.id = c.id_publicacion
+            WHERE p.id = $1
+            order by c.fecha DESC
+    `
     let resultado = await pool.query(consulta, [id]);
     return resultado.rows;
+}
+
+const addComentario = async (contenido, idUsuario, idPublicacion) => {
+    let query = `INSERT INTO comentarios(contenido, id_usuario, id_publicacion)
+                VALUES($1, $2, $3) RETURNING *
+    `
+    let resultado = await pool.query(query, [contenido, idUsuario, idPublicacion]);
+    return resultado.rows[0];
+}
+
+const getCantidadComentarios = async (id) => {
+    let query = `   select count(*) cantidad from comentarios c
+                    join publicaciones p
+                    on p.id = c.id_publicacion
+                    WHERE id_publicacion = $1
+                    group by c.id_publicacion;
+    `
+    let resultado = await pool.query(query, [id]);
+    if(!resultado.rows[0]) return 0
+    return resultado.rows[0].cantidad;
+}
+
+
+const addUsuario = async (nombre, email, password) => {
+    let query = `INSERT INTO usuarios(nombre, email, password) VALUES($1, $2, $3) RETURNING id, nombre, email;`
+    let resultado = await pool.query(query, [nombre, email, password]);
+    return resultado.rows[0];
 }
 
 module.exports = {
@@ -88,6 +124,9 @@ module.exports = {
     getCategorias,
     addPublicacion,
     getCategoriaByName,
-    getPublicacioById,
-    getComentarios
+    getPublicacionById,
+    getComentarios,
+    addComentario,
+    getCantidadComentarios,
+    addUsuario
 }

@@ -22,13 +22,27 @@
         <h2 class="text-center mt-5">Agregue un comentario:</h2>
 
         <form id="formComentario">
-            <input type="text" name="idPublicacion" value="{{publicacion.id}}">
+            <input type="hidden" name="idPublicacion" value="{{publicacion.id}}">
             Contenido: <textarea type="text" name="comentario" class="form-control"></textarea>
             <button class="btn btn-primary mt-3">Enviar</button>
         </form>
     </section>
+    {{!-- mostramos los comentarios --}}
     <section>
-        <h2 class="text-center mt-5">comentarios:</h2>
+        <h2 class="text-center mt-5">comentarios ({{cantidad}}):</h2>
+
+    {{#if comentarios}}
+        {{#each comentarios}}
+            <div>
+                <h3 class="text-cennter">Autor: {{this.nombre}}</h3>
+                <p>Comentario: {{this.contenido}}</p>
+                <p>Fecha: {{this.fecha}}</p>
+            </div>
+        {{/each}}
+        {{else}}
+        <h3 class="text-cennter">No hay comentarios asociados.</h3>
+    {{/if}}
+        
     </section>
        
     {{/if}}
@@ -59,6 +73,7 @@
             if(result.code ==201){
                 alert(result.message)
                 formulario.reset();
+                location.reload();
             }else{
                 alert(result.message)
             }
