@@ -7,6 +7,7 @@ const fileUpload = require('express-fileupload');
 const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion, getCategoriaByName, getPublicacioById, getComentarios } = require('./consultas.js')
 const { verificarToken } = require("./middlewares/jwt.js")
 const { upload } = require('./middlewares/upload.js')
+const cors = require("cors")
 const fs = require('fs');
 
 const app = express();
@@ -18,6 +19,7 @@ const SECRETO = process.env.SECRETO || "123456";
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use('/public', express.static('public'));
+app.use(cors());
 
 let limiteMb = 2;
 app.use(fileUpload({
@@ -41,14 +43,6 @@ app.set("view engine", "handlebars");
 app.set("views", path.resolve(__dirname, "./views"));
 
 //fin configuración handlebars
-
-
-try{
-    app.listen(process.env.PORT || 3000)
-}catch(error){
-    console.log(error)
-}
-
 
 
 //RUTAS DE VISTA
@@ -220,6 +214,9 @@ app.post("/api/v1/comentarios", verificarToken, (req, res) => {
     res.send("Recibiendo comentarios.")
     
 })
+
+
+app.listen(process.env.PORT || 3000)
 
 
 
