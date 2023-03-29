@@ -41,7 +41,7 @@
             redirect: 'follow'
         };
 
-        fetch("http://localhost:3000/api/v1/publicar", requestOptions)
+        fetch("/api/v1/publicar", requestOptions)
         .then(response => {
             if(response.status == 413){
                 return alert("Imagen supera el limite permitido")
