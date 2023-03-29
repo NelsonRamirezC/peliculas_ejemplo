@@ -4,7 +4,7 @@ const path = require('path');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const fileUpload = require('express-fileupload');
-const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion} = require('./consultas.js')
+const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion, getCategoriaByName, getPublicacioById, getComentarios } = require('./consultas.js')
 const { verificarToken } = require("./middlewares/jwt.js")
 const { upload } = require('./middlewares/upload.js')
 const fs = require('fs');
@@ -90,6 +90,67 @@ app.get("/publicar", verificarToken, async (req, res) => {
 })
 
 
+app.get("/clasico", (req, res) => {
+    getCategoriaByName("Clásico")
+    .then(publicaciones => {
+        publicaciones = publicaciones.map(publicacion => {
+            publicacion.fecha = moment(publicaciones.fecha).format('DD-MM-YYYY')
+            return publicacion
+        })
+        res.render("clasico",{
+            publicaciones 
+        })
+    })
+        .catch(error => {
+            res.render("clasico",{
+                error: "No se pudieron cargar las categorias"
+            })
+        })
+    })
+app.get("/moderno", (req, res) => {
+    getCategoriaByName("Moderno")
+    .then(publicaciones => {
+        publicaciones = publicaciones.map(publicacion => {
+            publicacion.fecha = moment(publicaciones.fecha).format('DD-MM-YYYY');
+            return publicacion
+        })
+
+        res.render("moderno",{
+            publicaciones
+        })
+    
+        }).catch(error => {
+            res.render("moderno",{
+                error: "No se pudieron cargar las categorias"
+            })
+        })
+    })
+
+app.get("/publicacion/:id", async (req, res) => {
+        try{
+
+            let {id} = req.params;
+            let comentarios = await getComentarios(id);
+            getPublicacioById(id).then(publicacion => {
+                publicacion.fecha = moment(publicacion.fecha).format('DD-MM-YYYY')
+                res.render("detalle_publicacion",{
+                    publicacion,
+                    comentarios
+            })
+        })
+        .catch(error => {
+            res.render("detalle_publicacion",{
+                error: "No se pudo encontrar la publicación"
+            })
+        })
+
+        }catch(error){
+
+        }
+    })
+
+
+
 
 //ENDPOINTS
 
@@ -145,5 +206,26 @@ app.post("/api/v1/publicar", verificarToken, upload, (req, res) => {
         fs.unlinkSync(path.resolve("./public/img/"+ req.imagen));
         res.status(500).json({code: 500, message: "no se pudo realizar la publicación"})
     }
+})
+
+
+app.post("/api/v1/comentarios", verificarToken, (req, res) => {
+    let {comentario, idPublicacion} = req.body;
+    console.log(comentario, idPublicacion, req.usuario.id)
+    res.send("Recibiendo comentarios.")
+    
+})
+
+
+
+
+
+
+
+
+
+
+app.all("*", (req, res) => {
+    res.send("<p>Ruta no existe <a href='/'>Volver</a></p>")
 })
 

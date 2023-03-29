@@ -1,4 +1,4 @@
-<h2 class="text-center mt-3">VISTA PRINCIPAL</h2>
+<h2 class="text-center mt-3">Categoría clásico</h2>
 
 
 <section class="py-5">
@@ -9,7 +9,7 @@
     <div class="row">
          {{#each publicaciones}}
                 <div class="col-12 col-md-6 col-lg-4 mt-2">
-                    {{>card
+                    {{>card 
                     idPublicacion=this.id
                     imagen=this.imagen
                     titulo=this.titulo
@@ -24,4 +24,3 @@
     {{/if}}
 
 </section>
-

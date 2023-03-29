@@ -28,9 +28,37 @@ const getPublicaciones = async () => {
         return resultado.rows;
 }
 
+const getPublicacioById = async (id) => {
+    let consulta = `
+    select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as usuario, ct.nombre as categoria from publicaciones p
+    join categorias ct
+    on p.id_categoria = ct.id
+    join usuarios u
+    on p.id_usuario = u.id
+    where p.id = $1;
+    `
+    let resultado = await pool.query(consulta, [id]);
+    return resultado.rows[0];
+}
+
 const getCategorias= async () => {
     let consulta = "SELECT id, nombre FROM categorias order by nombre ASC"
     let resultado = await pool.query(consulta);
+    return resultado.rows;
+}
+
+const getCategoriaByName = async (categoria) => {
+    let consulta = `
+    select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as autor, ct.nombre as categoria from publicaciones p
+    join categorias ct
+    on p.id_categoria = ct.id
+    join usuarios u
+    on p.id_usuario = u.id
+    where ct.nombre = $1
+    order by fecha asc
+    `
+
+    let resultado = await pool.query(consulta, [categoria]);
     return resultado.rows;
 }
 
@@ -48,10 +76,18 @@ const addPublicacion = async (titulo, contenido, id_categoria, id_usuario, image
     return resultado.rows[0];
 }
 
+const getComentarios = async(id) => {
+    let consulta = "SELECT * FROM comentarios where id_publicacion = $1"
+    let resultado = await pool.query(consulta, [id]);
+    return resultado.rows;
+}
 
 module.exports = {
     getPublicaciones,
     getUsuarioByEmailAndPassword,
     getCategorias,
-    addPublicacion
+    addPublicacion,
+    getCategoriaByName,
+    getPublicacioById,
+    getComentarios
 }

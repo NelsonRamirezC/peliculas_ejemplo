@@ -2,6 +2,7 @@ const path = require('path');
 const {v4: uuid} =require('uuid');
 const upload = (req, res, next) => {
     try{
+        
         if(req.files == null) return res.status(400).json({code: 400, message: "Debe proporcionar una foto."})
         let {foto} = req.files;
         
