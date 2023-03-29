@@ -31,6 +31,8 @@ CREATE TABLE comentarios(
 	FOREIGN KEY(id_usuario) REFERENCES usuarios(id),
 	FOREIGN KEY(id_publicacion) REFERENCES publicaciones(id)
 );
+truncate table comentarios;
+ALTER TABLE comentarios ADD COLUMN fecha date NOT NULL default NOW();
 
 INSERT INTO categorias(nombre) VALUES('Clásico'), ('Moderno');
 UPDATE publicaciones SET imagen = 'imagen.jpg'
