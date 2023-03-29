@@ -11,7 +11,7 @@ const fs = require('fs');
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000
 const SECRETO = process.env.SECRETO || "123456";
 
 
@@ -44,7 +44,7 @@ app.set("views", path.resolve(__dirname, "./views"));
 //fin configuración handlebars
 
 
-app.listen(PORT, () => console.log("http://localhost:"+PORT));
+app.listen(PORT, () => console.log("escuchando"));
 
 //RUTAS DE VISTA
 app.get("/", async (req, res) => {
