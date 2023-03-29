@@ -43,7 +43,13 @@ app.set("views", path.resolve(__dirname, "./views"));
 //fin configuración handlebars
 
 
-app.listen(process.env.PORT||3000)
+try{
+    app.listen(process.env.PORT || 3000)
+}catch(error){
+    console.log(error)
+}
+
+
 
 //RUTAS DE VISTA
 app.get("/", async (req, res) => {
