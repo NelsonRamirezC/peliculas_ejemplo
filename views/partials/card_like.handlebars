@@ -5,10 +5,31 @@
     <p class="card-text">{{contenido}}</p>
     <p class="card-text">Fecha publicación: {{fecha}}</p>
     <p class="card-text">Autor: {{autor}}</p>
-    <div class="d-flex justify-content-evenly">
-        <a onclick="irDetalle({{idPublicacion}})" class="btn btn-primary">Ver detalles</a>
+    <div class="d-flex justify-content-center">
 
+
+       {{{isLike like}}}
+
+        
     </div>
   
   </div>
 </div>
+
+
+<style>
+      .fa {
+            font-size: 50px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .like {
+            color: blue;
+        }
+        .dislike {
+            color: red;
+        }
+        .null {
+            color: gray;
+        }
+</style>

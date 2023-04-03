@@ -1,11 +1,10 @@
 const path = require('path');
-const {v4: uuid} =require('uuid');
+const {v4: uuid} = require('uuid');
 const upload = (req, res, next) => {
     try{
         
         if(req.files == null) return res.status(400).json({code: 400, message: "Debe proporcionar una foto."})
         let {foto} = req.files;
-        
         let mimetype = foto.mimetype.split("/")[0];
         if(mimetype != "image") return res.status(400).json({code: 400, message: "El archivo subido no corresponde a una foto."})
 
@@ -19,12 +18,9 @@ const upload = (req, res, next) => {
             req.imagen = nombreFoto;
             next();
           });
-
-
     }catch(error){
         res.status(500).json({code: 500, message: "No se pudo cargar la foto."})
     }
-
 }
 
 

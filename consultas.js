@@ -18,12 +18,13 @@ const pool = new Pool({
 
 
 //TRAER PUBLICACIONES
-const getPublicaciones = async () => {
+const getPublicaciones = async (option) => {
+        
         let consulta = `
-                        select p.id, p.titulo, p.contenido, p.fecha, p.imagen, u.nombre as autor from publicaciones p
-                        join usuarios u
-                        on p.id_usuario = u.id
-                        order by p.fecha DESC
+                    select p.id, titulo, contenido, fecha, id_categoria, p.id_usuario, imagen, u.nombre as autor from publicaciones p
+                    join usuarios u
+                    on p.id_usuario = u.id
+                    order by p.fecha ${option}
         `
         let resultado = await pool.query(consulta);
         return resultado.rows;
@@ -118,6 +119,37 @@ const addUsuario = async (nombre, email, password) => {
     return resultado.rows[0];
 }
 
+const darLike = async (idUsuario, idPublicacion) => {
+    let resultado = await pool.query("select * from like_dislike where id_usuario = $1 and id_publicacion = $2", [idUsuario, idPublicacion])
+    if(!resultado.rows[0]){
+        await pool.query("INSERT INTO like_dislike(islike, id_usuario, id_publicacion) values(true, $1, $2)", [idUsuario, idPublicacion])
+    }else {
+        if(resultado.rows[0].islike == true){
+            await pool.query("UPDATE like_dislike SET islike = false where id_usuario= $1 and id_publicacion = $2", [idUsuario, idPublicacion])
+        }else if(resultado.rows[0].islike == false){
+            await pool.query("UPDATE like_dislike SET islike = null where id_usuario= $1 and id_publicacion = $2", [idUsuario, idPublicacion])
+        }else {
+            await pool.query("UPDATE like_dislike SET islike = true where id_usuario= $1 and id_publicacion = $2", [idUsuario, idPublicacion])
+        }
+    }
+    return true;
+}
+
+const cantidadLikeAndDislike = async(idPublicacion) => {
+    let consulta = `
+        select islike, count(*) from like_dislike where id_publicacion = $1 and islike is not null
+        group by islike
+    `
+    let resultado = await pool.query(consulta, [idPublicacion]);
+    return resultado.rows;
+}
+
+const getLike = async (idUsuario, idPublicacion) => {
+    let consulta = "select islike from like_dislike where id_usuario = $1 and id_publicacion = $2;"
+    let resultado = await pool.query(consulta, [idUsuario, idPublicacion]);
+    return resultado.rows[0]
+}
+
 module.exports = {
     getPublicaciones,
     getUsuarioByEmailAndPassword,
@@ -128,5 +160,8 @@ module.exports = {
     getComentarios,
     addComentario,
     getCantidadComentarios,
-    addUsuario
+    addUsuario,
+    darLike,
+    getLike,
+    cantidadLikeAndDislike
 }

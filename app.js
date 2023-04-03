@@ -4,12 +4,14 @@ const path = require('path');
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const fileUpload = require('express-fileupload');
-const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion, getCategoriaByName, getPublicacionById, getComentarios, addComentario, getCantidadComentarios, addUsuario } = require('./consultas.js')
+const {getPublicaciones, getUsuarioByEmailAndPassword, getCategorias, addPublicacion, getCategoriaByName, getPublicacionById, getComentarios, addComentario, getCantidadComentarios, addUsuario, darLike, getLike, cantidadLikeAndDislike } = require('./consultas.js')
 const { verificarToken } = require("./middlewares/jwt.js")
 const { upload } = require('./middlewares/upload.js')
 const cors = require("cors")
 const fs = require('fs');
-const { throws } = require('assert');
+const apicache = require('apicache')
+const morgan = require("morgan");
+
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use('/public', express.static('public'));
 app.use(cors());
+app.use(morgan('tiny'));
+let cache = apicache.middleware
+
 
 let limiteMb = 2;
 app.use(fileUpload({
@@ -37,6 +42,13 @@ const hbs = create({
 	partialsDir: [
 		"views/partials/",
 	],
+    helpers: {
+        isLike(like){
+                if(like == null) return '<i  onclick="darLike(this)" class="fa fa-thumbs-up null"></i>'
+                if(like == true) return '<i onclick="darLike(this)" class="fa fa-thumbs-up like"></i>'
+                if(like == false) return '<i onclick="darLike(this)" class="fa fa-thumbs-down dislike"></i>'
+        }
+    }
 });
 
 app.engine("handlebars", hbs.engine);
@@ -47,9 +59,18 @@ app.set("views", path.resolve(__dirname, "./views"));
 
 
 //RUTAS DE VISTA
-app.get("/", async (req, res) => {
+app.get("/", cache('10 seconds'), async (req, res) => {
     try {
-        let publicaciones = await getPublicaciones();
+        
+        let {order} = req.query;
+        if(order){
+            let opciones = ["asc", "desc"].includes(order.toLowerCase());
+            if(!opciones) order = "asc";
+            
+        }else{
+           order = "asc"; 
+        }
+        let publicaciones = await getPublicaciones(order);
         publicaciones = publicaciones.map(publicacion => {
             publicacion.fecha = moment(publicacion.fecha).format('DD-MM-YYYY')
             return publicacion
@@ -129,26 +150,59 @@ app.get("/moderno", (req, res) => {
         })
     })
 
-app.get("/publicacion/:id", async (req, res) => {
+app.get("/publicacion/:id",  async (req, res) => {
         try{
+            let {token} = req.query;
+            let idUsuario;
+
+            jwt.verify(token, SECRETO, (error, data) => {
+                if(data) idUsuario = data.usuario.id
+            })
+            
 
             let {id} = req.params;
             let comentarios = await getComentarios(id);
             let cantidadComentarios = await getCantidadComentarios(id);
+            let like;
+            if(idUsuario){
+                like = await getLike(idUsuario, id)
+            }
+
+            if(like == undefined){
+                like=null;
+            }else{
+                like = like.islike
+            }
             comentarios = comentarios.map(comentario => {
                 comentario.fecha = moment(comentario.fecha).format('DD-MM-YYYY')
                 return comentario
             })
+
+            let likeDislikes = await cantidadLikeAndDislike(id);
+            console.log(likeDislikes);
+            let cantidadLikes = 0;
+            let cantidadDislikes = 0;
+
+            likeDislikes.forEach(elemento => {
+                if(elemento.islike == true) cantidadLikes = elemento.count;
+                if(elemento.islike == false) cantidadDislikes = elemento.count;
+            })
+
+
             getPublicacionById(id).then(publicacion => {
                 publicacion.fecha = moment(publicacion.fecha).format('DD-MM-YYYY')
                 res.render("detalle_publicacion",{
                     publicacion,
                     comentarios,
-                    cantidad: cantidadComentarios
+                    cantidad: cantidadComentarios,
+                    like: like,
+                    cantidadLikes,
+                    cantidadDislikes
+
             })
             })
             .catch(error => {
-
+                console.log(error)
             res.render("detalle_publicacion",{
                 error: "No se pudo encontrar la publicación"
             })
@@ -254,6 +308,20 @@ app.post("/api/v1/comentarios", verificarToken, async (req, res) => {
     }
     
 })
+
+app.post("/api/v1/like", verificarToken, async (req, res) => {
+    try{
+        let {idPublicacion} = req.body;
+        let idUsuario = req.usuario.id;
+        await darLike(idUsuario, idPublicacion);
+
+        res.status(201).json({code: 201, message: "like/dislike realizado con éxito."})
+    }catch(error){
+        console.log(error)
+        res.status(500).json({code: 500, message: "No fue posible realizar el like/dislike."})
+    }
+})
+
 
 let PORT = process.env.PORT || 3000
 

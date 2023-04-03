@@ -8,21 +8,27 @@
     {{else}}
     <div class="d-flex justify-content-center">
                 <div>
-                    {{>card 
+                    {{>card_like
+                    id=publicacion.id
                     imagen=publicacion.imagen
                     titulo=publicacion.titulo
                     contenido=publicacion.contenido
                     fecha = publicacion.fecha
                     autor = publicacion.autor
+                    like= like
                     }}
                 </div>
+    </div>
+    <div>
+            <p><strong>Cantidad de likes: </strong><span>{{cantidadLikes}}</span></p>
+            <p><strong>Cantidad de dislikes: </strong><span>{{cantidadDislikes}}</span></p>
     </div>
 <hr>
     <section>   
         <h2 class="text-center mt-5">Agregue un comentario:</h2>
 
         <form id="formComentario">
-            <input type="hidden" name="idPublicacion" value="{{publicacion.id}}">
+            <input type="hidden" name="idPublicacion" id="idPublicacion" value="{{publicacion.id}}">
             Contenido: <textarea type="text" name="comentario" class="form-control"></textarea>
             <button class="btn btn-primary mt-3">Enviar</button>
         </form>
@@ -33,11 +39,12 @@
 
     {{#if comentarios}}
         {{#each comentarios}}
-            <div>
+            <div class="border border-success p-2 mb-2">
                 <h3 class="text-cennter">Autor: {{this.nombre}}</h3>
                 <p>Comentario: {{this.contenido}}</p>
                 <p>Fecha: {{this.fecha}}</p>
             </div>
+            <hr>
         {{/each}}
         {{else}}
         <h3 class="text-cennter">No hay comentarios asociados.</h3>
@@ -81,3 +88,46 @@
         .catch(error => console.log('error', error));
     })
 </script>
+
+
+<script>
+    let idPublicacion = document.getElementById("idPublicacion");
+    const darLike = () =>{
+
+      const myHeaders = new Headers();
+        myHeaders.append("authorization", "Bearer " + localStorage.getItem("jwt"));
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+            "idPublicacion": idPublicacion.value
+        });
+
+        var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+
+    fetch("/api/v1/like", requestOptions)
+    .then(response => response.json())
+    .then(result => {
+        if(result.code == 201){
+            alert(result.message)
+            location.reload()
+        }else{
+            alert(result.message)
+        }
+    })
+    .catch(error => console.log('error', error));
+    }
+    
+
+
+</script>
+
+<style>
+    span{
+        font-size: 20px;
+    }
+</style>

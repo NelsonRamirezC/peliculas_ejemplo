@@ -15,7 +15,7 @@ const verificarToken = (req, res, next) => {
     }
     if(token){
         jwt.verify(token, SECRETO, (error, data) => {
-            if(error) return res.status(401).json({code:401, message:"Token no válido."})
+            if(error) return res.status(401).json({code:401, message:"Debe iniciar sesión con una cuenta habilitada."})
             req.usuario = data.usuario
             next();
         })
