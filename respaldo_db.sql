@@ -33,6 +33,16 @@ CREATE TABLE comentarios(
 	FOREIGN KEY(id_publicacion) REFERENCES publicaciones(id)
 );
 
+
+
+CREATE TABLE like_dislikes(
+	id serial primary key,
+	islike boolean,
+	id_usuario INT NOT NULL,
+	id_publicacion INT NOT NULL,
+	FOREIGN KEY(id_usuario) REFERENCES usuarios(id),
+	FOREIGN KEY(id_publicacion) REFERENCES publicaciones(id)
+);
 INSERT INTO categorias(nombre) VALUES('Clásico'), ('Moderno');
 
 INSERT INTO usuarios(nombre, email, password) VALUES('carlos', 'carlos@gmail.com', '123456'), ('pepito', 'pepito@gmail.com', '123456');
